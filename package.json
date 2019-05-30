@@ -1,0 +1,13 @@
+{
+  "name": "googlemapsapp",
+  "description": "Lab3",
+  "version": "1.0.0",
+  "author": "MrWade",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "hbs": "^4.0.3",
+    "node-fetch": "^2.3.0"
+  },
+  "scripts": { "start" : "node app.js" }
+}

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Geolocation</title>
+    <script src="https://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <style>
+      #map {
+        height: 100%;
+        width: 100%;
+      }
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      var markers = [];
+
+      function initMap() {
+        var myLatlng = {lat: 49.233123, lng: 28.468439};
+
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 4,
+          center: myLatlng
+        });
+
+        map.addListener('click', function(e) {
+          removeMarkers();
+          placeMarkerAndPanTo(e.latLng, map);
+        });
+      }
+
+      function placeMarkerAndPanTo(latLng, map) {
+        var marker = new google.maps.Marker({
+          position: latLng,
+          map: map
+        });
+
+        GetLatLng(latLng.lat(), latLng.lng(), function(temperature, result) {
+          var info = new google.maps.InfoWindow({
+            content: '<div>'+
+                     '<table frame="border" bordercolor="#59a69e" rules="cols" cellspacing="2">'+
+                     '<tr align="center">'+
+                     '<th rowspan="2">'+result.icon+'</th><th>Температура повітря,°C</th><th>Часовий пояс</th><th>Вологість повітря,%</th>'+
+                     '<th>Ймовірність опадів,%</th><th>Вітер,м/с</th>'+
+                     '</tr>'+
+                     '<tr align="center">'+
+                     '<td>'+temperature+'</td><td>'+result.timezone+'</td>'+
+                     '<td>'+result.currently.humidity * 100+'</td><td>'+result.currently.precipProbability * 100+'</td>'+
+                     '<td>'+Math.round(result.currently.windSpeed)+'</td>'+
+                     '</tr>'+
+                     '</table>'+
+                     '</div>'
+          });
+          marker.addListener("click", function() {
+            info.open(map, marker);
+          });
+          markers.push(marker);
+          map.panTo(latLng);
+        });
+      }
+
+      function removeMarkers()
+      {
+        for (i = 0; i < markers.length; i++) {
+          markers[i].setMap(null);
+        }
+        markers = [];
+      }
+
+      function GetLatLng(lat, lng, cb) {
+            $.ajax({
+                url: "/api",
+                contentType: "application/json",
+                method: "POST",
+                data: JSON.stringify({
+                    latitude: lat,
+                    longitude: lng
+                }),
+                success: function (result) {
+                  console.log(result);
+                  var temperature = Math.round((result.currently.temperature - 32) * 5 / 9);
+                    cb(temperature, result);
+                }
+            });
+        }
+    </script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDRFGWwwD1-3qFA7yH_aLjwqBy-l3mBzBY&callback=initMap">
+    </script>
+  </body>
+</html>
